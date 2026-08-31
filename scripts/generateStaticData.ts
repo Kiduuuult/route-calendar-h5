@@ -5,6 +5,7 @@ import type { RouteImage } from "../src/shared/types";
 
 const outputDirectory = path.resolve(process.cwd(), "public", "data");
 const imageDirectory = path.join(outputDirectory, "images");
+const imageDownloadTimeoutMs = 20_000;
 
 function extensionFor(contentType: string | null) {
   if (contentType?.includes("png")) return "png";
@@ -15,7 +16,7 @@ function extensionFor(contentType: string | null) {
 
 async function downloadImage(image: RouteImage, eventId: string, index: number): Promise<RouteImage | null> {
   try {
-    const response = await fetch(image.url);
+    const response = await fetch(image.url, { signal: AbortSignal.timeout(imageDownloadTimeoutMs) });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const filename = `${eventId.replace(/[^a-zA-Z0-9_-]/g, "_")}-${index + 1}.${extensionFor(response.headers.get("content-type"))}`;
