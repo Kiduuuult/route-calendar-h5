@@ -111,6 +111,12 @@ function queryString(page: number) {
 }
 
 async function fetchAllEvents(signal: AbortSignal) {
+  if (import.meta.env.VITE_STATIC_DATA === "true") {
+    const response = await fetch(`${import.meta.env.BASE_URL}data/route-calendar.json`, { signal });
+    if (!response.ok) throw new Error("Route calendar static data request failed");
+    return await response.json() as RouteCalendarResponse;
+  }
+
   let page = 1;
   let result: RouteCalendarResponse | null = null;
   const items: RouteEvent[] = [];
