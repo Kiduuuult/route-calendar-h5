@@ -112,7 +112,9 @@ function queryString(page: number) {
 
 async function fetchAllEvents(signal: AbortSignal) {
   if (import.meta.env.VITE_STATIC_DATA === "true") {
-    const response = await fetch(`${import.meta.env.BASE_URL}data/route-calendar.json`, { signal });
+    const staticDataUrl = new URL(`${import.meta.env.BASE_URL}data/route-calendar.json`, window.location.origin);
+    staticDataUrl.searchParams.set("updatedAt", String(Date.now()));
+    const response = await fetch(staticDataUrl, { signal, cache: "no-store" });
     if (!response.ok) throw new Error("Route calendar static data request failed");
     return await response.json() as RouteCalendarResponse;
   }
