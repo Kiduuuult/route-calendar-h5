@@ -1,6 +1,6 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { getRouteCalendar } from "../src/server/routeCalendar";
+import { getRouteCalendarSnapshot } from "../src/server/routeCalendar";
 import type { RouteImage } from "../src/shared/types";
 
 const outputDirectory = path.resolve(process.cwd(), "public", "data");
@@ -32,7 +32,7 @@ async function main() {
   await rm(outputDirectory, { recursive: true, force: true });
   await mkdir(imageDirectory, { recursive: true });
 
-  const calendar = await getRouteCalendar({ page: 1, pageSize: 100 });
+  const calendar = await getRouteCalendarSnapshot();
   for (const event of calendar.items) {
     const images = await Promise.all(event.images.map((image, index) => downloadImage(image, event.id, index)));
     event.images = images.filter((image): image is RouteImage => image !== null);
