@@ -8,6 +8,7 @@
     "dev:server": "tsx watch src/server/index.ts",
     "dev:web": "vite",
     "build": "tsc -b && vite build",
+    "test": "tsx --test src/server/*.test.ts",
     "generate:static": "tsx scripts/generateStaticData.ts",
     "start": "tsx src/server/index.ts"
   },
