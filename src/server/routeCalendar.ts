@@ -100,6 +100,7 @@ function attachments(value: unknown): Attachment[] {
 
 function mapLarkRecord(record: LarkRecord): RouteEvent | null {
   const fields = record.fields;
+  if (text(fields["对外展示状态"]) !== "已发布") return null;
   const city = text(fields["城市"]);
   const gymName = text(fields["岩馆名称（填写）"]) ?? text(fields["岩馆名称"]);
   if (!city || !gymName) return null;
@@ -254,13 +255,13 @@ function sortEvents(a: RouteEvent, b: RouteEvent) {
 }
 
 async function getPublishedData(): Promise<{ events: RouteEvent[]; gyms: PartnerGym[] }> {
-  const { LARK_APP_ID, LARK_APP_SECRET, LARK_TABLE_ID, LARK_VIEW_ID, LARK_PARTNER_TABLE_ID } = process.env;
-  if (!LARK_APP_ID || !LARK_APP_SECRET || !LARK_TABLE_ID || !LARK_VIEW_ID || !LARK_PARTNER_TABLE_ID) {
+  const { LARK_APP_ID, LARK_APP_SECRET, LARK_TABLE_ID, LARK_PARTNER_TABLE_ID } = process.env;
+  if (!LARK_APP_ID || !LARK_APP_SECRET || !LARK_TABLE_ID || !LARK_PARTNER_TABLE_ID) {
     throw new Error("Missing Lark Base environment configuration");
   }
   const accessToken = await getTenantAccessToken(LARK_APP_ID, LARK_APP_SECRET);
   const [records, partnerRecords] = await Promise.all([
-    getTableRecords(LARK_TABLE_ID, accessToken, LARK_VIEW_ID),
+    getTableRecords(LARK_TABLE_ID, accessToken),
     getTableRecords(LARK_PARTNER_TABLE_ID, accessToken),
   ]);
   const gyms = partnerRecords.flatMap((record) => {
@@ -268,7 +269,7 @@ async function getPublishedData(): Promise<{ events: RouteEvent[]; gyms: Partner
     return gym ? [gym] : [];
   }).sort((a, b) => a.city.localeCompare(b.city, "zh-CN") || a.name.localeCompare(b.name, "zh-CN"));
 
-  // The configured view is "对外页面数据源", whose records have already been filtered to 已发布.
+  // Read the complete source table and enforce the publication boundary in code.
   const mapped = records.flatMap((record) => {
     const event = mapLarkRecord(record);
     return event ? [{ event, attachments: attachments(record.fields["现场图片"])}] : [];
