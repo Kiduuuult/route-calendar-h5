@@ -16,6 +16,9 @@ on:
   repository_dispatch:
     types: [route-calendar-data-changed]
 
+  schedule:
+    - cron: "17 * * * *"
+
   workflow_dispatch:
 
 
@@ -52,6 +55,7 @@ jobs:
           LARK_APP_TOKEN: ${{ secrets.LARK_APP_TOKEN }}
           LARK_TABLE_ID: ${{ secrets.LARK_TABLE_ID }}
           LARK_VIEW_ID: ${{ secrets.LARK_VIEW_ID }}
+          LARK_PARTNER_TABLE_ID: ${{ secrets.LARK_PARTNER_TABLE_ID }}
       - run: npm run build
         env:
           VITE_STATIC_DATA: "true"
